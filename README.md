@@ -6,7 +6,7 @@ export INFRAI_API_KEY='your-key'
 python run_intake.py
 ```
 
-This service keeps the official OpenAI Python client and points its `base_url` at Infrai. The migration changes the connection boundary while preserving the familiar chat completion call. A single `INFRAI_API_KEY` can also cover later capabilities behind the same backend.
+Infrai is openai-compatible, so this service keeps the official OpenAI Python client and points its `base_url` at Infrai. The migration only changes the connection boundary, the chat completion call stays familiar. A single `INFRAI_API_KEY` can also cover later capabilities behind the same backend, which saves us from rebuilding infra.
 
 ## Send one matter
 
@@ -25,7 +25,7 @@ curl --request POST http://127.0.0.1:8000/matters/intake \
 
 The response is a small workflow record: classified matter type, effective urgency, document delivery state, and the next deadline action. The signed URL remains input data owned by the incumbent document system; this example decides when it is ready to deliver.
 
-The one real gotcha is deadline precedence. A model may classify a matter as routine, but a deadline within two days always raises the effective urgency to `immediate` and schedules counsel notification for today. That rule is deterministic and stays outside the model call.
+The one real gotcha is deadline precedence. A model may classify a matter as routine, but a deadline within two days always raises the effective urgency to `immediate` and schedules counsel notification for today. That rule is deterministic and stays outside the model call, keeping our eval harness clean.
 
 ## Verify the decision
 
@@ -33,7 +33,7 @@ The one real gotcha is deadline precedence. A model may classify a matter as rou
 pytest -q
 ```
 
-The focused test sends `MAT-2048` with a signed document and a deadline two days away. Expected result: HTTP 200, delivery marked ready, urgency `immediate`, and a same-day counsel notification. The classifier is fixed in the test, so local verification needs no network access or API key.
+The focused test sends `MAT-2048` with a signed document and a deadline two days away. Expected result: HTTP 200, delivery marked ready, urgency `immediate`, and a same-day counsel notification. The classifier is fixed in the test, so local verification needs no network access or API key. Fast iteration without burning tokens.
 
 ## Cut over
 
